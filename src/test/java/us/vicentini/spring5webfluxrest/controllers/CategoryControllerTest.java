@@ -148,7 +148,7 @@ public class CategoryControllerTest {
     void shouldPatchCategory() {
         Category category = Category.builder().name("New name").build();
         Category categoryFromDb = Category.builder().name("Old name").id(ID).build();
-        Category updatedCategory = categoryFromDb.toBuilder().name(category.getName()).id(ID).build();
+        Category updatedCategory = categoryFromDb.toBuilder().name(category.getName()).build();
         BDDMockito.given(categoryRepository.save(updatedCategory))
                 .willReturn(Mono.just(updatedCategory));
         BDDMockito.given(categoryRepository.findById(ID))
@@ -163,6 +163,25 @@ public class CategoryControllerTest {
                 .expectStatus().isOk()
                 .expectBody(Category.class)
                 .isEqualTo(updatedCategory);
+    }
+
+
+    @Test
+    void shouldPatchCategoryNoChanges() {
+        Category category = Category.builder().build();
+        Category categoryFromDb = Category.builder().name("Old name").id(ID).build();
+        BDDMockito.given(categoryRepository.findById(ID))
+                .willReturn(Mono.just(categoryFromDb));
+
+        webTestClient.patch()
+                .uri(CategoryController.BASE_PATH + "/" + ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ObjectUtil.asJsonString(category))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Category.class)
+                .isEqualTo(categoryFromDb);
     }
 
 

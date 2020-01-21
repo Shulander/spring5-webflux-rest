@@ -123,6 +123,47 @@ class VendorControllerTest {
     }
 
 
+    @Test
+    void shouldPatchVendor() {
+        Vendor vendor = Vendor.builder().name("New name").build();
+        Vendor vendorFromDb = Vendor.builder().name("Old name").id(ID_1).build();
+        Vendor updatedVendor = vendorFromDb.toBuilder().name(vendor.getName()).build();
+        BDDMockito.given(vendorRepository.save(updatedVendor))
+                .willReturn(Mono.just(updatedVendor));
+        BDDMockito.given(vendorRepository.findById(ID_1))
+                .willReturn(Mono.just(vendorFromDb));
+
+        webTestClient.patch()
+                .uri(VendorController.BASE_PATH + "/" + ID_1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ObjectUtil.asJsonString(vendor))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Vendor.class)
+                .isEqualTo(updatedVendor);
+    }
+
+
+    @Test
+    void shouldPatchVendorNoChanges() {
+        Vendor vendor = Vendor.builder().build();
+        Vendor vendorFromDb = Vendor.builder().name("Old name").id(ID_1).build();
+        BDDMockito.given(vendorRepository.findById(ID_1))
+                .willReturn(Mono.just(vendorFromDb));
+
+        webTestClient.patch()
+                .uri(VendorController.BASE_PATH + "/" + ID_1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ObjectUtil.asJsonString(vendor))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Vendor.class)
+                .isEqualTo(vendorFromDb);
+    }
+
+
     @AfterEach
     void tearDown() {
         verifyNoMoreInteractions(vendorRepository);

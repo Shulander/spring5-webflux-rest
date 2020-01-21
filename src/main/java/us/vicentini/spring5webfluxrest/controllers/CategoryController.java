@@ -61,10 +61,12 @@ public class CategoryController {
     public Mono<Category> patch(@PathVariable String id, @RequestBody Mono<Category> category) {
         return Mono.zip(categoryRepository.findById(id), category)
                 .flatMap(objects -> {
-                    copyIfNonNull(objects.getT2()::getName, objects.getT1()::setName);
-                    return Mono.just(objects.getT1());
-                })
-                .flatMap(categoryRepository::save);
+                    if (copyIfNonNull(objects.getT2()::getName, objects.getT1()::setName)) {
+                        return categoryRepository.save(objects.getT1());
+                    } else {
+                        return Mono.just(objects.getT1());
+                    }
+                });
     }
 
 }

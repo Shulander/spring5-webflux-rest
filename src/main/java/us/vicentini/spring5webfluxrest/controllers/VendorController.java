@@ -3,6 +3,7 @@ package us.vicentini.spring5webfluxrest.controllers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import us.vicentini.spring5webfluxrest.domain.Vendor;
 import us.vicentini.spring5webfluxrest.repository.VendorRepository;
+
+import static us.vicentini.spring5webfluxrest.util.ObjectPropertyUtils.copyIfNonNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,6 +54,19 @@ public class VendorController {
                     return Mono.just(objects.getT2());
                 })
                 .flatMap(vendorRepository::save);
+    }
+
+
+    @PatchMapping("/{id}")
+    public Mono<Vendor> patch(@PathVariable String id, @RequestBody Mono<Vendor> vendor) {
+        return Mono.zip(vendorRepository.findById(id), vendor)
+                .flatMap(objects -> {
+                    if (copyIfNonNull(objects.getT2()::getName, objects.getT1()::setName)) {
+                        return vendorRepository.save(objects.getT1());
+                    } else {
+                        return Mono.just(objects.getT1());
+                    }
+                });
     }
 
 }

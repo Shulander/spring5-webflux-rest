@@ -9,10 +9,12 @@ import java.util.function.Supplier;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ObjectPropertyUtils {
 
-    public static <T> void copyIfNonNull(Supplier<T> s, Consumer<T> c) {
+    public static <T> boolean copyIfNonNull(Supplier<T> s, Consumer<T> c) {
         T value = s.get();
         if (value != null) {
             c.accept(value);
+            return true;
         }
+        return false;
     }
 }
