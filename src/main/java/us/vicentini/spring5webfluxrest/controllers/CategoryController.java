@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -39,6 +40,18 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Category> save(@RequestBody Mono<Category> newCategory) {
         return newCategory.flatMap(categoryRepository::save);
+    }
+
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Category> update(@PathVariable String id, @RequestBody Mono<Category> newCategory) {
+        return newCategory
+                .map(category -> {
+                    category.setId(id);
+                    return category;
+                })
+                .flatMap(categoryRepository::save);
     }
 
 }

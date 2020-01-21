@@ -121,6 +121,27 @@ public class CategoryControllerTest {
     }
 
 
+    @Test
+    void shouldUpdateCategory() {
+        Category category = Category.builder()
+                .name("New Category")
+                .build();
+        Category categoryWithId = category.toBuilder().id(ID).build();
+        BDDMockito.given(categoryRepository.save(categoryWithId))
+                .willReturn(Mono.just(categoryWithId));
+
+        webTestClient.put()
+                .uri(BASE_PATH + "/" + ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ObjectUtil.asJsonString(category))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Category.class)
+                .isEqualTo(categoryWithId);
+    }
+
+
     @AfterEach
     void tearDown() {
         verifyNoMoreInteractions(categoryRepository);
