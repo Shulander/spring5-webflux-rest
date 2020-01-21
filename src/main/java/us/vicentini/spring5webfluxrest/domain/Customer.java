@@ -13,8 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Category {
+public class Customer {
     @Id
     private String id;
-    private String name;
+    private String firstName;
+    private String lastName;
 }
