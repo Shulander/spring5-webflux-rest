@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import us.vicentini.spring5webfluxrest.domain.Category;
 import us.vicentini.spring5webfluxrest.repository.CategoryRepository;
+import us.vicentini.spring5webfluxrest.util.ObjectUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -96,6 +97,27 @@ public class CategoryControllerTest {
                 .expectStatus().isOk()
                 .expectBody().isEmpty();
 
+    }
+
+
+    @Test
+    void shouldCreateNewCategory() {
+        Category newCategory = Category.builder()
+                .name("New Category")
+                .build();
+        Category persistedCategory = newCategory.toBuilder().id(ID).build();
+        BDDMockito.given(categoryRepository.save(newCategory))
+                .willReturn(Mono.just(persistedCategory));
+
+        webTestClient.post()
+                .uri(BASE_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ObjectUtil.asJsonString(newCategory))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Category.class)
+                .isEqualTo(persistedCategory);
     }
 
 
