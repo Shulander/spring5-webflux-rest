@@ -1,5 +1,6 @@
 package us.vicentini.spring5webfluxrest.controllers;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import us.vicentini.spring5webfluxrest.domain.Vendor;
 import us.vicentini.spring5webfluxrest.repository.VendorRepository;
+import us.vicentini.spring5webfluxrest.util.ObjectUtil;
 
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static us.vicentini.spring5webfluxrest.controllers.VendorController.BASE_PATH;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,5 +76,32 @@ class VendorControllerTest {
                 .expectStatus().isOk()
                 .expectBody(Vendor.class)
                 .isEqualTo(vendor1);
+    }
+
+
+    @Test
+    void shouldCreateNewVendor() {
+        Vendor newVendor = Vendor.builder()
+                .name("New Vendor")
+                .build();
+        Vendor persistedVendor = newVendor.toBuilder().id(ID_1).build();
+        BDDMockito.given(vendorRepository.save(newVendor))
+                .willReturn(Mono.just(persistedVendor));
+
+        webTestClient.post()
+                .uri(VendorController.BASE_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ObjectUtil.asJsonString(newVendor))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Vendor.class)
+                .isEqualTo(persistedVendor);
+    }
+
+
+    @AfterEach
+    void tearDown() {
+        verifyNoMoreInteractions(vendorRepository);
     }
 }
