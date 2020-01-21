@@ -129,6 +129,8 @@ public class CategoryControllerTest {
         Category categoryWithId = category.toBuilder().id(ID).build();
         BDDMockito.given(categoryRepository.save(categoryWithId))
                 .willReturn(Mono.just(categoryWithId));
+        BDDMockito.given(categoryRepository.findById(ID))
+                .willReturn(Mono.just(categoryWithId));
 
         webTestClient.put()
                 .uri(BASE_PATH + "/" + ID)
@@ -136,7 +138,7 @@ public class CategoryControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(ObjectUtil.asJsonString(category))
                 .exchange()
-                .expectStatus().isCreated()
+                .expectStatus().isOk()
                 .expectBody(Category.class)
                 .isEqualTo(categoryWithId);
     }

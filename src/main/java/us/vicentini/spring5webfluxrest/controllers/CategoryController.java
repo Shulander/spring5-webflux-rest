@@ -44,12 +44,11 @@ public class CategoryController {
 
 
     @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
     public Mono<Category> update(@PathVariable String id, @RequestBody Mono<Category> newCategory) {
-        return newCategory
-                .map(category -> {
-                    category.setId(id);
-                    return category;
+        return Mono.zip(categoryRepository.findById(id), newCategory)
+                .flatMap(objects -> {
+                    objects.getT2().setId(objects.getT1().getId());
+                    return Mono.just(objects.getT2());
                 })
                 .flatMap(categoryRepository::save);
     }

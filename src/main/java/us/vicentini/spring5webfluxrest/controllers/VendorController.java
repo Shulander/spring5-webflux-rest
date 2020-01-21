@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -39,6 +40,17 @@ public class VendorController {
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Vendor> save(@RequestBody Mono<Vendor> newVendor) {
         return newVendor.flatMap(vendorRepository::save);
+    }
+
+
+    @PutMapping("/{id}")
+    public Mono<Vendor> update(@PathVariable String id, @RequestBody Mono<Vendor> newVendor) {
+        return Mono.zip(vendorRepository.findById(id), newVendor)
+                .flatMap(objects -> {
+                    objects.getT2().setId(objects.getT1().getId());
+                    return Mono.just(objects.getT2());
+                })
+                .flatMap(vendorRepository::save);
     }
 
 }

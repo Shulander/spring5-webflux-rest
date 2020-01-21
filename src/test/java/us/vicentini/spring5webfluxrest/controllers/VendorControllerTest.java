@@ -100,6 +100,29 @@ class VendorControllerTest {
     }
 
 
+    @Test
+    void shouldUpdateVendor() {
+        Vendor vendor = Vendor.builder()
+                .name("New Vendor")
+                .build();
+        Vendor vendorWithId = vendor.toBuilder().id(ID_1).build();
+        BDDMockito.given(vendorRepository.save(vendorWithId))
+                .willReturn(Mono.just(vendorWithId));
+        BDDMockito.given(vendorRepository.findById(ID_1))
+                .willReturn(Mono.just(vendorWithId));
+
+        webTestClient.put()
+                .uri(VendorController.BASE_PATH + "/" + ID_1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(ObjectUtil.asJsonString(vendor))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Vendor.class)
+                .isEqualTo(vendorWithId);
+    }
+
+
     @AfterEach
     void tearDown() {
         verifyNoMoreInteractions(vendorRepository);
